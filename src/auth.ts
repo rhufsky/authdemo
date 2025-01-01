@@ -1,8 +1,17 @@
 import NextAuth from "next-auth";
 import GitLab from "next-auth/providers/gitlab";
+const GITLAB_OAUTH_SCOPES = "read_user";
+const GITLAB_AUTH_URL = "https://gitlab.com/oauth/authorize";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [GitLab],
+  providers: [
+    GitLab({
+      authorization: {
+        url: GITLAB_AUTH_URL,
+        params: { scope: GITLAB_OAUTH_SCOPES },
+      },
+    }),
+  ],
 
   callbacks: {
     async jwt({ token, user, account, profile }) {
