@@ -1,15 +1,22 @@
 import NextAuth from "next-auth";
 import GitLab from "next-auth/providers/gitlab";
+
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import prisma from "./database/prismaclient";
+
 const GITLAB_OAUTH_SCOPES = "read_user";
 const GITLAB_AUTH_URL = "https://gitlab.com/oauth/authorize";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+
   providers: [
     GitLab({
       authorization: {
         url: GITLAB_AUTH_URL,
         params: { scope: GITLAB_OAUTH_SCOPES },
       },
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
 
