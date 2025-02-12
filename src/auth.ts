@@ -1,15 +1,11 @@
 import NextAuth from "next-auth";
 import GitLab from "next-auth/providers/gitlab";
-
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import prisma from "./database/prismaclient";
+import { init } from "next/dist/compiled/webpack/webpack";
 
 const GITLAB_OAUTH_SCOPES = "read_user";
 const GITLAB_AUTH_URL = "https://gitlab.com/oauth/authorize";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  //  adapter: PrismaAdapter(prisma),
-
   providers: [
     GitLab({
       authorization: {
@@ -22,18 +18,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
   callbacks: {
     async jwt({ token, user, account, profile }) {
+      console.log("#############");
+      console.log("current JWT");
       console.log(token);
-      if (account && profile && user) {
-        console.log("INITIAL JWT");
-        return {
-          ...token,
-          status: "INITIAL",
-        };
-      } else {
-        console.log("SUBSQUENT JWT");
+      console.log("#############");
 
-        return { ...token, status: "REFRESH" };
+      if (account && profile && user) {
+        console.log("adding INITIAL status to JWT");
+        const initialToken = { ...token, status: "INITIAL", refreshCount: 0 };
+        return initialToken;
+      } else {
+        console.log(
+          `current JWT status: ${token.status} / ${token.refreshCount}`
+        );
+
+        console.log("adding REFRESH status / count to JWT");
+
+        const refreshCount = token.refreshCount || 0;
+
+        const refreshedToken = {
+          ...token,
+          status: "REFRESH",
+          refreshCount: refreshCount + 1,
+        };
+        return refreshedToken;
       }
+    },
+
+    async session({ session, token }) {
+      session.status = token.status as string;
+      return session;
     },
   },
 });
