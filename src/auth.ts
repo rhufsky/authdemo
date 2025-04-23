@@ -1,7 +1,5 @@
-import { log } from "console";
 import NextAuth from "next-auth";
 import GitLab from "next-auth/providers/gitlab";
-import { init } from "next/dist/compiled/webpack/webpack";
 
 const GITLAB_OAUTH_SCOPES = "read_user";
 const GITLAB_AUTH_URL = "https://gitlab.com/oauth/authorize";
@@ -18,7 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
 
   session: {
-    strategy: "jwt", // ✅ Ensures JWT updates persist
+    strategy: "jwt", // Ensures JWT updates persist
   },
 
   callbacks: {
